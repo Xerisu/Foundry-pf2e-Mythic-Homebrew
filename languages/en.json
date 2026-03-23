@@ -1,3 +1,20 @@
 {
-    "MODULE.hello": "hello"
+    "settings": {
+        "mythicRerollProficiencyBonus": {
+            "name": "Mythic Reroll Proficiency Bonus",
+            "hint": "Value used when rerolling with mythic points."
+        },
+        "mythicRerollProficiencyLabel": {
+            "name": "Mythic Reroll Proficiency Label",
+            "hint": "Name used when rerolling with mythic points."
+        },
+        "allowFlatchecks": {
+            "name": "Allow Mythic Flat Checks",
+            "hint": "Allow rerolling flat checks with mythic points."
+        },
+        "monkeypatchMythicReroll": {
+            "name": "Monkeypatching Mythic Rerolls",
+            "hint": "Enables module."
+        }
+    }
 }

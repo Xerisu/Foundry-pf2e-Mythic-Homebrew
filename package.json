@@ -1,0 +1,29 @@
+{
+  "name": "foundry-pf2e-mythic-homebrew",
+  "version": "1.0.0",
+  "description": "![](https://img.shields.io/badge/Foundry-v10-informational)\r <!--- Downloads @ Latest Badge -->\r <!--- replace <user>/<repo> with your username/repository -->\r <!--- ![Latest Release Download Count](https://img.shields.io/github/downloads/<user>/<repo>/latest/module.zip) -->",
+  "homepage": "https://github.com/Xerisu/Foundry-pf2e-Mythic-Homebrew#readme",
+  "bugs": {
+    "url": "https://github.com/Xerisu/Foundry-pf2e-Mythic-Homebrew/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Xerisu/Foundry-pf2e-Mythic-Homebrew.git"
+  },
+  "license": "ISC",
+  "author": "Xerisu",
+  "type": "module",
+  "main": "/script/module.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc --noEmit && vite build"
+  },
+  "devDependencies": {
+    "foundryvtt-sync": "^2.1.0",
+    "fvtt-types": "github:7H3LaughingMan/foundry-types#v13",
+    "pf2e-types": "github:7H3LaughingMan/pf2e-types#v13",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.2",
+    "vite-tsconfig-paths": "^6.1.1"
+  }
+}

@@ -1,31 +1,34 @@
 {
-  "id": "module",
-  "title": "New Module",
-  "description": "",
+  "id": "pf2e-mythic-homebrew",
+  "title": "Pf2e Mythic Homebrew",
+  "description": "Adjustment to Runelords campaign",
   "version": "#{VERSION}#",
   "library": "false",
-  "manifestPlusVersion": "1.2.0",
   "compatibility": {
-    "minimum": 10,
-    "verified": 10,
-    "maximum": 11
+    "minimum": 13.351,
+    "verified": 13.351
   },
   "authors": [
     {
-      "name": "The League of Extraordinary FVTT Developers",
-      "url": "https://github.com/League-of-Foundry-Developers",
-      "discord": "discordID#0001"
+      "name": "Xerisu",
+      "url": "https://github.com/Xerisu",
+      "discord": "xerisu"
     }
   ],
   "relationships": {
-    "systems": [],
-    "requires": []
+    "systems": [
+      {
+        "id": "pf2e",
+        "type": "system",
+        "manifest": "https://github.com/foundryvtt/pf2e/releases/latest/download/system.json",
+        "compatibility": {
+          "minimum": "7.11.3"
+        }
+      }
+    ]
   },
   "esmodules": [
-    "scripts/module.js"
-  ],
-  "scripts": [
-    "scripts/lib/lib.js"
+    "dist/pf2e-mythic-homebrew.js"
   ],
   "styles": [
     "styles/module.css"
