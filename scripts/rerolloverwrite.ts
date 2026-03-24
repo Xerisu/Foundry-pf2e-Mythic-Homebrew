@@ -28,7 +28,6 @@ const SYSTEM_ID = "pf2e";
 async function rerollFromMessage(message: ChatMessagePF2e, options: RerollOptions = {}): Promise<void> {
     const mythicRerollProficiencyBonus = game.settings.get(moduleId, settings.mythicRerollProficiencyBonus) as number
     const mythicRerollProficiencyLabel = game.settings.get(moduleId, settings.mythicRerollProficiencyLabel) as string
-    ui.notifications.info("Cokolwiek!")
     if (!(message.isAuthor || game.user.isGM)) {
         ui.notifications.error(game.i18n.localize("PF2E.RerollMenu.ErrorCantDelete"));
         return;
