@@ -1,0 +1,169 @@
+import { CheckRoll, ZeroToThree, StatisticDifficultyClass } from "pf2e-types";
+import { Rolled } from "fvtt-types/client/dice/roll.mjs";
+import { sluggify } from "./util.ts";
+
+class SimplifiedDegreeOfSuccess {
+    /** The calculated degree of success */
+    readonly value: DegreeOfSuccessIndex;
+
+    /** The degree of success prior to adjustment. If there was no adjustment, it is identical to the `value` */
+    readonly unadjusted: DegreeOfSuccessIndex;
+
+    /** A degree adjustment, usually from some character ability */
+    readonly adjustment: { label: string; amount: DegreeAdjustmentAmount } | null;
+
+    /** The result of a d20 roll */
+    readonly dieResult: number;
+
+    /** The total of a roll, including the die result and total modifier */
+    readonly rollTotal: number;
+
+    /** The check DC being rolled against */
+    readonly dc: CheckDC;
+
+    constructor(
+        roll: Rolled<CheckRoll> | RollBrief,
+        dc: CheckDC | number,
+        dosAdjustments: DegreeAdjustmentsRecord | null = null,
+    ) {
+        if (roll instanceof Roll) {
+            this.dieResult =
+                (roll.isDeterministic
+                    ? roll.terms.find((t) => t instanceof foundry.dice.terms.NumericTerm)
+                    : roll.dice.find((d) => d instanceof foundry.dice.terms.Die && d.faces === 20)
+                )?.total ?? 1;
+            this.rollTotal = roll.total;
+        } else {
+            this.dieResult = roll.dieValue;
+            this.rollTotal = roll.dieValue + roll.modifier;
+        }
+
+        this.dc = typeof dc === "number" ? { value: dc } : dc;
+
+        this.unadjusted = this.#calculateDegreeOfSuccess();
+        this.adjustment = this.#getDegreeAdjustment(this.unadjusted, dosAdjustments);
+        this.value = this.adjustment
+            ? this.#adjustDegreeOfSuccess(this.adjustment.amount, this.unadjusted)
+            : this.unadjusted;
+        this.key = SIMPLIFIED_DEGREE_OF_SUCCESS_STRINGS[this.value];
+        this.slug = sluggify(this.key);
+        this.label = game.i18n.localize(`PF2E.Check.Result.Degree.Check.${this.key}`);
+    }
+
+    static readonly CRITICAL_FAILURE = 0;
+    static readonly FAILURE = 1;
+    static readonly SUCCESS = 2;
+    static readonly CRITICAL_SUCCESS = 3;
+
+    /** The degree in (dromedary) camel case; e.g., "criticalSuccess" */
+    key: string;
+
+    /** The degree in slug form; e.g., "critical-success" */
+    slug: string;
+
+    /** The localized degree-of-success label */
+    label: string;
+
+    #getDegreeAdjustment(
+        degree: DegreeOfSuccessIndex,
+        adjustments: DegreeAdjustmentsRecord | null,
+    ): { label: string; amount: DegreeAdjustmentAmount } | null {
+        if (!adjustments) return null;
+
+        for (const outcome of ["all", ...SIMPLIFIED_DEGREE_OF_SUCCESS_STRINGS] as const) {
+            const { label, amount } = adjustments[outcome] ?? {};
+            if (
+                amount &&
+                label &&
+                !(degree === SimplifiedDegreeOfSuccess.CRITICAL_SUCCESS && amount === DEGREE_ADJUSTMENT_AMOUNTS.INCREASE) &&
+                !(degree === SimplifiedDegreeOfSuccess.CRITICAL_FAILURE && amount === DEGREE_ADJUSTMENT_AMOUNTS.LOWER) &&
+                (outcome === "all" || SIMPLIFIED_DEGREE_OF_SUCCESS_STRINGS.indexOf(outcome) === degree)
+            ) {
+                return { label, amount };
+            }
+        }
+
+        return null;
+    }
+
+    #adjustDegreeOfSuccess(
+        amount: DegreeAdjustmentAmount,
+        degreeOfSuccess: DegreeOfSuccessIndex,
+    ): DegreeOfSuccessIndex {
+        switch (amount) {
+            case "criticalFailure":
+                return 0;
+            case "failure":
+                return 1;
+            case "success":
+                return 2;
+            case "criticalSuccess":
+                return 3;
+            default:
+                return Math.clamp(degreeOfSuccess + amount, 0, 3) as DegreeOfSuccessIndex;
+        }
+    }
+
+    /**
+     * @param degree The current success value
+     * @return The new success value
+     */
+    #adjustDegreeByDieValue(degree: DegreeOfSuccessIndex): DegreeOfSuccessIndex {
+        if (this.dieResult === 20) {
+            return this.#adjustDegreeOfSuccess(DEGREE_ADJUSTMENT_AMOUNTS.INCREASE, degree);
+        } else if (this.dieResult === 1) {
+            return this.#adjustDegreeOfSuccess(DEGREE_ADJUSTMENT_AMOUNTS.LOWER, degree);
+        }
+
+        return degree;
+    }
+
+    #calculateDegreeOfSuccess(): DegreeOfSuccessIndex {
+        const dc = this.dc.value;
+
+        if (this.rollTotal - dc >= 10) {
+            return this.#adjustDegreeByDieValue(SimplifiedDegreeOfSuccess.CRITICAL_SUCCESS);
+        } else if (dc - this.rollTotal >= 10) {
+            return this.#adjustDegreeByDieValue(SimplifiedDegreeOfSuccess.CRITICAL_FAILURE);
+        } else if (this.rollTotal >= dc) {
+            return this.#adjustDegreeByDieValue(SimplifiedDegreeOfSuccess.SUCCESS);
+        }
+
+        return this.#adjustDegreeByDieValue(SimplifiedDegreeOfSuccess.FAILURE);
+    }
+}
+
+type RollBrief = { dieValue: number; modifier: number };
+
+const DEGREE_ADJUSTMENT_AMOUNTS = {
+    LOWER_BY_TWO: -2,
+    LOWER: -1,
+    INCREASE: 1,
+    INCREASE_BY_TWO: 2,
+    TO_CRITICAL_FAILURE: "criticalFailure",
+    TO_FAILURE: "failure",
+    TO_SUCCESS: "success",
+    TO_CRITICAL_SUCCESS: "criticalSuccess",
+} as const;
+
+type DegreeAdjustmentAmount = (typeof DEGREE_ADJUSTMENT_AMOUNTS)[keyof typeof DEGREE_ADJUSTMENT_AMOUNTS];
+
+type DegreeAdjustmentsRecord = {
+    [key in "all" | DegreeOfSuccessString]?: { label: string; amount: DegreeAdjustmentAmount };
+};
+
+interface CheckDC {
+    slug?: string | null;
+    statistic?: StatisticDifficultyClass | null;
+    label?: string;
+    scope?: "attack" | "check";
+    value: number;
+    visible?: boolean;
+}
+
+type DegreeOfSuccessIndex = ZeroToThree;
+
+const SIMPLIFIED_DEGREE_OF_SUCCESS_STRINGS = ["criticalFailure", "failure", "success", "criticalSuccess"] as const;
+type DegreeOfSuccessString = (typeof SIMPLIFIED_DEGREE_OF_SUCCESS_STRINGS)[number];
+
+export { SIMPLIFIED_DEGREE_OF_SUCCESS_STRINGS, SimplifiedDegreeOfSuccess };

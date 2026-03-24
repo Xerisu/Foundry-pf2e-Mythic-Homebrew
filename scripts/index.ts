@@ -1,4 +1,5 @@
-import {moduleId, settings} from "./constants.js"
+import { moduleId, settings } from "./constants.ts"
+import { rerollFromMessage } from "./rerolloverwrite.ts";
 
 Hooks.once('init', async function() {
     game.settings.register(
@@ -10,7 +11,8 @@ Hooks.once('init', async function() {
             scope: "world",
             config: true,
             type: Number,
-            default: 10
+            default: 10,
+
         }
     );
     game.settings.register(
@@ -46,10 +48,16 @@ Hooks.once('init', async function() {
             scope: "world",
             config: true,
             type: Boolean,
-            default: false
+            default: false,
+            requiresReload: true
         }
     );
 });
 
 Hooks.once('ready', async function() {
+    const monkeypatch = game.settings.get(moduleId, settings.monkeypatchMythicReroll) as boolean
+    if (monkeypatch) {
+        game.pf2e.Check.rerollFromMessage = rerollFromMessage;
+    }
+        
 });

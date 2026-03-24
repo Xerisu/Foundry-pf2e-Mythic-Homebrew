@@ -16,7 +16,8 @@
   "main": "/script/module.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc --noEmit && vite build"
+    "build": "tsc --noEmit && vite build",
+    "tsc": "tsc --noEmit"
   },
   "devDependencies": {
     "foundryvtt-sync": "^2.1.0",
@@ -25,5 +26,8 @@
     "typescript": "^6.0.2",
     "vite": "^8.0.2",
     "vite-tsconfig-paths": "^6.1.1"
+  },
+  "dependencies": {
+    "@7h3laughingman/pf2e-helpers": "github:7H3LaughingMan/pf2e-helpers#v13"
   }
 }
