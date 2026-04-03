@@ -1,0 +1,24 @@
+<div class="hero-point-handler">
+
+  <!-- 🔝 Główna instrukcja -->
+  <p class="notes">{{instructions}}</p>
+
+  <!-- 📦 Tytuł sekcji -->
+  <h4 class="form-header">{{sessionStart.instructions}}</h4>
+
+  <!-- 📦 Zawartość sekcji -->
+  <div class="form-group" style="flex-direction: column; align-items: flex-start;">
+
+    <label class="checkbox">
+      <input type="radio" name="sessionStartOption" value="resetTo">
+      {{sessionStart.resetTo}}
+    </label>
+
+    <label class="checkbox">
+      <input type="radio" name="sessionStartOption" value="ignore" checked>
+      {{sessionStart.ignore}}
+    </label>
+
+  </div>
+
+</div>
