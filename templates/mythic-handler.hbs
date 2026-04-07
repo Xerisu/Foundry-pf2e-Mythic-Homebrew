@@ -1,24 +1,75 @@
-<div class="hero-point-handler">
+<div class="mythic-point-handler">
 
-  <!-- 🔝 Główna instrukcja -->
+
   <p class="notes">{{instructions}}</p>
 
-  <!-- 📦 Tytuł sekcji -->
-  <h4 class="form-header">{{sessionStart.instructions}}</h4>
+  <div class="mythic-grid">
 
-  <!-- 📦 Zawartość sekcji -->
-  <div class="form-group" style="flex-direction: column; align-items: flex-start;">
+    <!-- FOLLOW THE CALLING -->
+    <div class="grid-section">
+      <h4 class="form-header">{{followTheCalling.instructions}}</h4>
+      <p class="notes">{{followTheCalling.hint}}</p>
 
-    <label class="checkbox">
-      <input type="radio" name="sessionStartOption" value="resetTo">
-      {{sessionStart.resetTo}}
-    </label>
+      <div class="form-group" style="flex-direction: column; align-items: flex-start;">
+        <label class="checkbox">
+          <input type="radio" name="followTheCalling" value="ignore" checked>
+          {{ignore}}
+        </label>
 
-    <label class="checkbox">
-      <input type="radio" name="sessionStartOption" value="ignore" checked>
-      {{sessionStart.ignore}}
-    </label>
+        {{#each actors}}
+          <label class="checkbox">
+            <input type="radio" name="followTheCalling" value="{{id}}">
+            {{name}}
+          </label>
+        {{/each}}
+      </div>
+    </div>
+
+    <!-- KILL MYTHIC ENEMY -->
+    <div class="grid-section">
+      <h4 class="form-header">{{killMythicEnemy.instructions}}</h4>
+      <p class="notes">{{killMythicEnemy.hint}}</p>
+
+      <div class="form-group" style="flex-direction: column; align-items: flex-start;">
+
+        {{#each actors}}
+          <label class="checkbox">
+            <input type="checkbox" name="killMythicEnemy" value="{{id}}">
+            {{name}}
+          </label>
+        {{/each}}
+      </div>
+    </div>
+
+    <!-- SESSION START -->
+    <div class="grid-section">
+      <h4 class="form-header">{{sessionStart.instructions}}</h4>
+
+      <div class="form-group" style="flex-direction: column; align-items: flex-start;">
+        <label class="checkbox">
+          <input type="radio" name="sessionStart" value="ignore" checked>
+          {{ignore}}
+        </label>
+        <label class="checkbox">
+          <input type="radio" name="sessionStart" value="resetTo">
+          {{sessionStart.resetTo}}
+        </label>
+      </div>
+    </div>
+
+    <!-- BONUS POINT -->
+    <div class="grid-section">
+      <h4 class="form-header">{{bonusPoint}}</h4>
+
+      <div class="form-group" style="flex-direction: column; align-items: flex-start;">
+        {{#each actors}}
+          <label class="checkbox">
+            <input type="checkbox" name="bonusPoint" value="{{id}}" {{#if checked}}checked{{/if}}>
+            {{name}}
+          </label>
+        {{/each}}
+      </div>
+    </div>
 
   </div>
-
 </div>
