@@ -1,7 +1,6 @@
 import { Rolled } from "@7h3laughingman/foundry-types/client/dice/roll.mjs";
 import { ChatMessagePF2e, CheckRoll, DegreeAdjustmentAmount, DegreeOfSuccessString, RollNoteSource, SaveType, TokenDocumentPF2e } from "pf2e-types";
 import { moduleId, settings } from "./constants.ts";
-import NumericTerm from "@7h3laughingman/foundry-types/client/dice/terms/numeric.mjs";
 import { SimplifiedDegreeOfSuccess } from "./SimplifiedDegreeOfSuccess.ts";
 
 const REROLL_TYPES = ["hero", "mythic", "new", "lower", "higher"] as const;
@@ -20,7 +19,7 @@ type RerollSaveHook = {
 type SaveRollData = {
     die: number,
     dosAdjustments?: Record<string, { label: string, amount: DegreeAdjustmentAmount }>,
-    modifiers: { excluded: boolean, label: string, modifier: number }[],
+    modifiers: { excluded: boolean, label: string, modifier: number, slug: string }[],
     notes: RollNoteSource[],
     private: boolean,
     rerolled?: RerollType,
@@ -43,8 +42,12 @@ async function UpdateToolbeltReroll(hookData: RerollSaveHook) {
     if (!monkeypatch) {
         return;
     }
-    const proficiencyModifier = hookData.data.modifiers.find(x => x.label === 'Mythic');
-    if (proficiencyModifier === undefined) {
+    const mythicProficiencyModifier = hookData.data.modifiers.find(x => x.label === 'Mythic');
+    if (mythicProficiencyModifier === undefined) {
+        return;
+    }
+    const oldProficiencyModifier = hookData.data.modifiers.find(x => x.label !== 'Mythic' && x.slug === 'proficiency');
+    if (oldProficiencyModifier === undefined) {
         return;
     }
 
@@ -67,28 +70,26 @@ async function UpdateToolbeltReroll(hookData: RerollSaveHook) {
     // Calculate and adjust new modifier
     const pwolVariant = game.pf2e.settings.variants.pwol.enabled;
     const actorLevel = hookData.target.actor?.level ?? 0;
-    proficiencyModifier.modifier = mythicRerollProficiencyBonus + (pwolVariant ? 0 : actorLevel);
-    proficiencyModifier.label = mythicRerollProficiencyLabel;
-    const newTotalModifier = hookData.data.modifiers
+    mythicProficiencyModifier.modifier = mythicRerollProficiencyBonus + (pwolVariant ? 0 : actorLevel);
+    mythicProficiencyModifier.label = mythicRerollProficiencyLabel;
+
+    if (oldProficiencyModifier.modifier > mythicProficiencyModifier.modifier) {
+        //mythicProficiencyModifier.modifier += oldTotalModifier - newTotalModifier;
+        // setting which proficiency shows up
+        mythicProficiencyModifier.excluded = true;
+        oldProficiencyModifier.excluded = false;
+    }
+    const totalModifier = hookData.data.modifiers
         .filter((modifier) => !modifier.excluded)
-        .reduce<number>((prevResult, modifier) => {return prevResult + modifier.modifier}, 0);
-    const oldTotalModifier = (hookData.oldRoll.terms[2] as NumericTerm).number;
+        .reduce<number>((prevResult, modifier) => {return prevResult + modifier.modifier}, 0)
     
     // Check if old modifier was bigger, if yes, go back to old modifier
-    let totalModifier
-    if (oldTotalModifier > newTotalModifier) {
-        proficiencyModifier.modifier += oldTotalModifier - newTotalModifier;
-        totalModifier = oldTotalModifier;
-    }
-    else {
-        totalModifier = newTotalModifier;
-    }
+
 
     // Change degree of success (if relevant)
     const dieResult = hookData.data.die;
     const degreeOfSuccess = new SimplifiedDegreeOfSuccess({dieValue: dieResult, modifier: totalModifier}, dc, hookData.data.dosAdjustments);
     hookData.data.success = degreeOfSuccess.key as DegreeOfSuccessString;
-
     hookData.data.value = degreeOfSuccess.rollTotal;
 
     // Change display data
