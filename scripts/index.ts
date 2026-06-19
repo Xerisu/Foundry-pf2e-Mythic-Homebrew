@@ -1,6 +1,7 @@
 import { moduleId, settings } from "./constants.ts"
 import { mythicPointHandler } from "./mythicPointHandler.ts";
 import { rerollFromMessage } from "./rerolloverwrite.ts";
+import { UpdateToolbeltReroll } from "./toolbeltreroll.ts";
 
 Hooks.once('init', async function() {
     game.settings.register(
@@ -69,3 +70,5 @@ Hooks.once('ready', async function() {
     }
         
 });
+
+Hooks.on('pf2e-toolbelt.rerollSave', UpdateToolbeltReroll);
