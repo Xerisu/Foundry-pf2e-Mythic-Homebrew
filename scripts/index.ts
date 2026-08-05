@@ -2,6 +2,7 @@ import { moduleId, settings } from "./constants.ts"
 import { mythicPointHandler } from "./mythicPointHandler.ts";
 import { rerollFromMessage } from "./rerolloverwrite.ts";
 import { UpdateToolbeltReroll } from "./toolbeltreroll.ts";
+import { monkeyPatchApplyDamage } from "./mythicResistance.ts";
 
 Hooks.once('init', async function() {
     game.settings.register(
@@ -54,12 +55,42 @@ Hooks.once('init', async function() {
             requiresReload: true
         }
     );
+    game.settings.register(
+        moduleId, 
+        settings.monkeypatchResistance, 
+        {
+            name: "settings.monkeypatchResistance.name",
+            hint: "settings.monkeypatchResistance.hint",
+            scope: "world",
+            config: true,
+            type: Boolean,
+            default: false,
+            requiresReload: true
+        }
+    );
+    game.settings.register(
+        moduleId, 
+        settings.mythicProficiencyName, 
+        {
+            name: "settings.mythicProficiencyName.name",
+            hint: "settings.mythicProficiencyName.hint",
+            scope: "world",
+            config: true,
+            type: String,
+            default: "mythic-proficiency",
+            requiresReload: true
+        }
+    );
 });
 
 Hooks.once('ready', async function() {
-    const monkeypatch = game.settings.get(moduleId, settings.monkeypatchMythicReroll) as boolean
-    if (monkeypatch) {
+    const monkeypatchReroll = game.settings.get(moduleId, settings.monkeypatchMythicReroll) as boolean
+    if (monkeypatchReroll) {
         game.pf2e.Check.rerollFromMessage = rerollFromMessage;
+    }
+    const monkeypatchResistance = game.settings.get(moduleId, settings.monkeypatchResistance) as boolean
+    if (monkeypatchResistance) {
+        monkeyPatchApplyDamage();
     }
 
     // Make some functions available for macros

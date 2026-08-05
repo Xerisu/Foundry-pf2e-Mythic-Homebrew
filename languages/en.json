@@ -15,6 +15,14 @@
         "monkeypatchMythicReroll": {
             "name": "Monkeypatching Mythic Rerolls",
             "hint": "Enables module."
+        },
+        "monkeypatchResistance": {
+            "name": "Monkeypatching Mythic Resistance",
+            "hint": "Enables automated mythic resistance."
+        },
+        "mythicProficiencyName": {
+            "name": "Mythic Proficiency Name",
+            "hint": "Name for mythic proficiency."
         }
     }
 }

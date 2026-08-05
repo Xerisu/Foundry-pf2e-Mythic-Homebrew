@@ -3,5 +3,7 @@ export const settings = {
     mythicRerollProficiencyBonus: "mythicRerollProficiencyBonus",
     mythicRerollProficiencyLabel: "mythicRerollProficiencyLabel",
     allowFlatchecks: "allowFlatchecks",
-    monkeypatchMythicReroll: "monkeypatchMythicReroll"
+    monkeypatchMythicReroll: "monkeypatchMythicReroll",
+    monkeypatchResistance: "monkeypatchResistance",
+    mythicProficiencyName: "mythicProficiencyName" 
 }
