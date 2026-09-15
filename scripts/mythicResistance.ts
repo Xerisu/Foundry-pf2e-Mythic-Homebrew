@@ -62,8 +62,6 @@ function monkeyPatchApplyDamage() {
                 return (originalDescriptor?.get?.call(this) ?? 0) + mythicResistance;
             },
         });
-
-        console.log(this);
         
         try {
             return await originalApplyDamage.apply(this, [{
