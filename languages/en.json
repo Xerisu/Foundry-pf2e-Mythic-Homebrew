@@ -23,6 +23,10 @@
         "mythicProficiencyName": {
             "name": "Mythic Proficiency Name",
             "hint": "Name for mythic proficiency."
+        },
+        "settings.mythicEnemyDied": {
+            "name": "Mythic Enemy Died Message",
+            "hint": "Reminder for gm to give mythic points when mythic enemy dies"
         }
     }
 }

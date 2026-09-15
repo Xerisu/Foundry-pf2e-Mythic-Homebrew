@@ -5,5 +5,6 @@ export const settings = {
     allowFlatchecks: "allowFlatchecks",
     monkeypatchMythicReroll: "monkeypatchMythicReroll",
     monkeypatchResistance: "monkeypatchResistance",
-    mythicProficiencyName: "mythicProficiencyName" 
+    mythicProficiencyName: "mythicProficiencyName",
+    mythicEnemyDied: "mythicEnemyDied"
 }

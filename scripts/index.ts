@@ -3,6 +3,7 @@ import { mythicPointHandler } from "./mythicPointHandler.ts";
 import { rerollFromMessage } from "./rerolloverwrite.ts";
 import { UpdateToolbeltReroll } from "./toolbeltreroll.ts";
 import { monkeyPatchApplyDamage } from "./mythicResistance.ts";
+import { mythicEnemyDiedMessage } from "./mythicEnemyDied.ts";
 
 Hooks.once('init', async function() {
     game.settings.register(
@@ -81,6 +82,19 @@ Hooks.once('init', async function() {
             requiresReload: true
         }
     );
+    game.settings.register(
+        moduleId, 
+        settings.mythicEnemyDied, 
+        {
+            name: "settings.mythicEnemyDied.name",
+            hint: "settings.mythicEnemyDied.hint",
+            scope: "world",
+            config: true,
+            type: Boolean,
+            default: true,
+            requiresReload: true
+        }
+    );
 });
 
 Hooks.once('ready', async function() {
@@ -103,3 +117,5 @@ Hooks.once('ready', async function() {
 });
 
 Hooks.on('pf2e-toolbelt.rerollSave', UpdateToolbeltReroll);
+
+Hooks.on('applyTokenStatusEffect', mythicEnemyDiedMessage);
