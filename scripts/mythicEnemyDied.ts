@@ -3,7 +3,10 @@ import { moduleId, settings } from "./constants.ts";
 
 async function mythicEnemyDiedMessage(token : TokenPF2e, effect : string, active : boolean) {
     if (game.settings.get(moduleId, settings.mythicEnemyDied) as boolean === false) {
-        return
+        return;
+    }
+    if (!game.user.isGM) {
+        return;
     }
     if (effect === "dead" && active === true) {
         if (token.actor?.system.traits?.value.includes("mythic") ?? false) {
