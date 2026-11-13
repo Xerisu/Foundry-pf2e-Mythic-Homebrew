@@ -118,4 +118,4 @@ Hooks.once('ready', async function() {
 
 Hooks.on('pf2e-toolbelt.rerollSave', UpdateToolbeltReroll);
 
-Hooks.on('applyTokenStatusEffect', mythicEnemyDiedMessage);
+Hooks.on('preCreateActiveEffect', mythicEnemyDiedMessage);
