@@ -1,5 +1,6 @@
 import { ActorPF2e } from "pf2e-types";
 import { moduleId } from "./constants.ts";
+import { mythicHeroes } from "./util.ts";
 
 var isMythicHandlerDialogOpen = false
 
@@ -149,20 +150,6 @@ export async function mythicPointHandler() {
 function getMythicHandlerTemplatePath(): string {
     return `modules/${moduleId}/templates/mythic-handler.hbs`;
 }
-/**
- * Retrieves the list of party members that are characters
- *
- * @return {Array<Actor>} The list of hero actors.
-*/
-function mythicHeroes(): ActorPF2e[] {
-    return (
-        game.actors?.party?.members
-            .filter((actor) => actor?.isOfType("character"))
-            .filter((actor) => !actor?.system.traits?.value.toString().includes("minion"))
-            .filter((actor) => !actor?.system.traits?.value.toString().includes("eidolon"))
-            .filter((actor) => actor?.system.resources.mythicPoints?.max ? (actor?.system.resources.mythicPoints?.max > 0) : false) || []
-    );
-}
 
 /**
  * Adds mythic points to the specified actor or all actors.
@@ -198,7 +185,6 @@ async function addMythicPoints(mythicpoints: number, actorId: MythicPointRecipie
     }
 }
 
-// TODO: Dodac send message
 async function handleDialogResponse(element: ParentNode | null): Promise<void> {
     if (!element) {
         return;

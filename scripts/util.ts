@@ -51,6 +51,21 @@ const _cached: {
     checkRoll?: typeof CheckRoll;
 } = {};
 
+/**
+ * Retrieves the list of party members that are characters
+ *
+ * @return {Array<Actor>} The list of hero actors.
+*/
+function mythicHeroes(): ActorPF2e[] {
+    return (
+        game.actors?.party?.members
+            .filter((actor) => actor?.isOfType("character"))
+            .filter((actor) => !actor?.system.traits?.value.toString().includes("minion"))
+            .filter((actor) => !actor?.system.traits?.value.toString().includes("eidolon"))
+            .filter((actor) => actor?.system.resources.mythicPoints?.max ? (actor?.system.resources.mythicPoints?.max > 0) : false) || []
+    );
+}
+
 function getCheckRollClass(): typeof CheckRoll {
     return (_cached.checkRoll ??= CONFIG.Dice.rolls.find((value) => value.name === "CheckRoll") as typeof CheckRoll);
 }
@@ -131,6 +146,7 @@ export {
     ErrorPF2e,
     sluggify,
     signedInteger,
+    mythicHeroes,
     isCheckRoll,
     isRolledCheckRoll,
     isActorPF2e,
