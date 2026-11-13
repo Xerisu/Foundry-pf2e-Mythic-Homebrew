@@ -218,23 +218,129 @@ async function handleDialogResponse(element: ParentNode | null): Promise<void> {
 
     if (sessionStart != "ignore") {
         await addMythicPoints(3);
-        //const message = "Tu bedzie wiadomosc ze start sesji i wgl";
-        //sendMessage(message);
+        await sendSessionStartMessage(3);
     } 
+
     if (killMythicEnemyActors.length > 0) {
         await addMythicPoints(1);
         for (const actor of killMythicEnemyActors) {
-                await addMythicPoints(1,actor);
+            await addMythicPoints(1, actor);
         }
-    }
-    if (followTheCalling != "ignore") {
-        await addMythicPoints(1, followTheCalling);
-        // todo: dodac cooldown
-    }
-    if (bonusPointActors.length > 0) {
-        for (const actor of bonusPointActors) {
-                await addMythicPoints(1,actor);
-        }
+        await sendKilledMythicEnemyMessage(1, 1, killMythicEnemyActors);
     }
 
+    if (followTheCalling != "ignore") {
+        await addMythicPoints(1, followTheCalling);
+        await sendFollowCallingMessage(1, followTheCalling);
+        // todo: dodac cooldown
+    }
+
+    if (bonusPointActors.length > 0) {
+        for (const actor of bonusPointActors) {
+            await addMythicPoints(1, actor);
+        }
+        await sendBonusMythicPointsMessage(1, bonusPointActors);
+    }
+}
+
+async function sendSessionStartMessage(mythicPointsAmount : number) {
+    if (!game.user.isGM) {
+        return;
+    }
+
+    // TODO: Tu + w szablonie dodać lokalizację
+    const templateData = {
+        mythicPointsAmount: mythicPointsAmount,
+        mythicPointsString: mythicPointsAmount > 1 ? "Mythic Points": "Mythic Point"
+    };
+
+    // @ts-expect-error
+    const content = await renderTemplate(`modules/${moduleId}/templates/mythic-points-received/session-start-mythic-deed.hbs`, templateData);
+
+    await ChatMessage.create({
+        content: content,
+        speaker: ChatMessage.getSpeaker({ alias: "Mythic Point Handler" })
+    });
+}
+
+async function sendKilledMythicEnemyMessage(mythicPointsAmountNormal : number, mythicPointsAmountAdditional : number, actorAdditionalIds: MythicPointRecipient[]) {
+    if (!game.user.isGM) {
+        return;
+    }
+
+    const actorsAdditional : Array<ActorPF2e<null>> = actorAdditionalIds.map(id => game.actors?.get(id)).filter(actor => actor != undefined);
+
+    if(actorsAdditional.length == 0) return;
+
+    // TODO: Tu + w szablonie dodać lokalizację
+    const templateData = {
+        normal: {
+            mythicPointsAmount: mythicPointsAmountNormal,
+            mythicPointsString: mythicPointsAmountNormal > 1 ? "Mythic Points": "Mythic Point"
+        },
+        additional: {
+            actorNames: actorsAdditional.map(actor => actor.name),
+            mythicPointsAmount: mythicPointsAmountAdditional,
+            mythicPointsString: mythicPointsAmountAdditional > 1 ? "Mythic Points": "Mythic Point"
+        },
+    };
+
+    // @ts-expect-error
+    const content = await renderTemplate(`modules/${moduleId}/templates/mythic-points-received/mythic-enemy-died.hbs`, templateData);
+
+    await ChatMessage.create({
+        content: content,
+        speaker: ChatMessage.getSpeaker({ alias: "Mythic Point Handler" })
+    });
+}
+
+async function sendFollowCallingMessage(mythicPointsAmount : number, actorId: MythicPointRecipient) {
+    if (!game.user.isGM) {
+        return;
+    }
+
+    const actor : ActorPF2e<null> | undefined = game.actors?.get(actorId);
+    if(!actor) return;
+
+    // TODO: Tu + w szablonie dodać lokalizację
+    const templateData = {
+        actorName: actor.name,
+        // @ts-expect-error
+        // Nazwa powinna kończyć się na Calling
+        callingName: actor.feats?.get("mythic")?.slots["mythic-calling"]?.feat?.name ?? "Unknown Calling",
+        mythicPointsAmount: mythicPointsAmount,
+        mythicPointsString: mythicPointsAmount > 1 ? "Mythic Points": "Mythic Point"
+    };
+
+    // @ts-expect-error
+    const content = await renderTemplate(`modules/${moduleId}/templates/mythic-points-received/follow-calling.hbs`, templateData);
+
+    await ChatMessage.create({
+        content: content,
+        speaker: ChatMessage.getSpeaker({ alias: "Mythic Point Handler" })
+    });
+}
+
+async function sendBonusMythicPointsMessage(mythicPointsAmount : number, actorIds: MythicPointRecipient[]) {
+    if (!game.user.isGM) {
+        return;
+    }
+
+    const actors : Array<ActorPF2e<null>> = actorIds.map(id => game.actors?.get(id)).filter(actor => actor != undefined);
+    if(actors.length == 0) return;
+
+    // TODO: Tu + w szablonie dodać lokalizację
+    const templateData = {
+        actorNames: actors.map(actor => actor.name),
+        mythicPointsAmount: mythicPointsAmount,
+        mythicPointsString: mythicPointsAmount > 1 ? "Mythic Points": "Mythic Point"
+    };
+
+    // @ts-expect-error
+    const content = await renderTemplate(`modules/${moduleId}/templates/mythic-points-received/bonus-mythic-point.hbs`, templateData);
+
+    await ChatMessage.create({
+        content: content,
+        speaker: ChatMessage.getSpeaker({ alias: "Mythic Point Handler" })
+    });
 }
